@@ -1,0 +1,1 @@
+This repo contains essential files for testing some PHP web apps tested in _SQIRL: Grey-Box Detection of SQL Injection Vulnerabilities Using Reinforcement Learning_.

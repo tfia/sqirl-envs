@@ -1,0 +1,34 @@
+services:
+  mediawiki:
+    image: mediawiki:1.38.2
+    container_name: mediawiki_app
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - images:/var/www/html/images
+      - ./LocalSettings.php:/var/www/html/LocalSettings.php
+  database:
+    image: mariadb:10
+    container_name: mediawiki_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: my_wiki
+      MYSQL_USER: wikiuser
+      MYSQL_PASSWORD: example
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+      - db:/var/lib/mysql
+      - ./my_wiki_backup.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "wikiuser", "--password=example"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  images:
+  db:
