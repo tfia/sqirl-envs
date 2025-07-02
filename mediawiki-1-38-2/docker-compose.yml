@@ -4,7 +4,7 @@ services:
     container_name: mediawiki_app
     restart: always
     ports:
-      - "8080:80"
+      - "8003:80"
     depends_on:
       database:
         condition: service_healthy
@@ -19,10 +19,13 @@ services:
       MYSQL_DATABASE: my_wiki
       MYSQL_USER: wikiuser
       MYSQL_PASSWORD: example
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: example_root_password
     volumes:
-      - db:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
       - ./my_wiki_backup.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      --general-log=1
+      --general-log-file=/var/lib/mysql/general.log
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "wikiuser", "--password=example"]
       interval: 5s
