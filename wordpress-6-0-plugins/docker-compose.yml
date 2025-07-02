@@ -1,0 +1,39 @@
+services:
+  wordpress:
+    build: .
+    container_name: wordpress_app
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./install-plugins.sh:/install-plugins.sh
+
+  database:
+    image: mariadb:10
+    container_name: wordpress_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_ROOT_PASSWORD: example_root_password
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./exampledb_backup.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "exampleuser", "--password=examplepass"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  wordpress:
