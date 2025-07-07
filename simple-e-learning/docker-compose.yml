@@ -1,0 +1,34 @@
+services:
+  elearning-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simple-e-learning-app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./vcs:/var/www/html
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: mariadb:10
+    container_name: simple-e-learning-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: vcs_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: example_root_password
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./vcs/database:/docker-entrypoint-initdb.d
+    command: >
+      --general-log=1
+      --general-log-file=/var/lib/mysql/general.log
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "--password=example"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
